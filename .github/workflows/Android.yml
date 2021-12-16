@@ -41,7 +41,7 @@ jobs:
           ndk-version: r15c
 
       # Runs a set of commands using the runners shell
-      - name: Lime Script
+      - name: script run line haha
         run: |
           mkdir -p "%HAXELIB_ROOT%"
           haxelib setup "%HAXELIB_ROOT%"
