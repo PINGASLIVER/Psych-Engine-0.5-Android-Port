@@ -543,6 +543,8 @@ class WeekEditorState extends MusicBeatState
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data, weekFileName + ".json");
 		}
+
+                openfl.system.System.setClipboard(data.trim());
 	}
 	
 	private static function onSaveComplete(_):Void
