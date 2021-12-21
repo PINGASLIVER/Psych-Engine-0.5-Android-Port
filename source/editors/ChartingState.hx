@@ -2597,6 +2597,7 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), Paths.formatToSongPath(_song.song) + ".json");
 		}
+                openfl.system.System.setClipboard(data.trim());
 	}
 	
 	function sortByTime(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
@@ -2638,6 +2639,8 @@ class ChartingState extends MusicBeatState
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), "events.json");
 		}
+
+                openfl.system.System.setClipboard(data.trim());
 	}
 
 	function onSaveComplete(_):Void
