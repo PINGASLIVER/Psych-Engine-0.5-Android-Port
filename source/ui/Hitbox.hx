@@ -62,38 +62,25 @@ class Hitbox extends FlxSpriteGroup
 		var button = new FlxButton(X, 0);
 		var frames = Paths.getSparrowAtlas('hitbox/hitbox', 'shared');
 		
-		var graphic:FlxGraphic = FlxGraphic.fromFrame(frames.getByName(framestring));
+        var graphic:FlxGraphic = FlxGraphic.fromFrame(frames.getByName(framestring));
 
-		button.loadGraphic(graphic);
+        button.loadGraphic(graphic);
 
-		/*button.width = sizex;
-		button.height = FlxG.height;*/
-		button.setGraphicSize(Std.int(sizex), FlxG.height);
-		button.updateHitbox();
+        button.alpha = 0;
+    
+        button.onDown.callback = function (){
+            FlxTween.num(0, 0.75, .075, {ease: FlxEase.circInOut}, function (a:Float) { button.alpha = a; });
+        };
 
-		button.alpha = 0;
+        button.onUp.callback = function (){
+            FlxTween.num(0.75, 0, .1, {ease: FlxEase.circInOut}, function (a:Float) { button.alpha = a; });
+        }
+        
+        button.onOut.callback = function (){
+            FlxTween.num(button.alpha, 0, .2, {ease: FlxEase.circInOut}, function (a:Float) { button.alpha = a; });
+        }
 
-		var tween:FlxTween;
-
-		button.onDown.callback = function (){
-			if (tween != null)
-				tween.cancel();
-			tween = FlxTween.num(button.alpha, 0.75, .075, {ease: FlxEase.circInOut}, function (a:Float) { button.alpha = a; });
-		};
-
-		button.onUp.callback = function (){
-			if (tween != null)
-				tween.cancel();
-			tween = FlxTween.num(button.alpha, 0, .15, {ease: FlxEase.circInOut}, function (a:Float) { button.alpha = a; });
-		}
-		
-		button.onOut.callback = function (){
-			if (tween != null)
-				tween.cancel();
-			tween = FlxTween.num(button.alpha, 0, .15, {ease: FlxEase.circInOut}, function (a:Float) { button.alpha = a; });
-		}
-
-		return button;
+        return button;
 	}
 
 	override public function destroy():Void

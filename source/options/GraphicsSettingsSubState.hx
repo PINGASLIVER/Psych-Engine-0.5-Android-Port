@@ -71,6 +71,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			false);
 		option.onChange = onChangePersistentData; //Persistent Cached Data changes FlxGraphic.defaultPersist
 		addOption(option);
+
 		super();
 	}
 

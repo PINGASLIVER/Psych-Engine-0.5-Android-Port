@@ -29,7 +29,7 @@ using StringTools;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay'];
+	var options:Array<String> = ['Note Colors', 'Controls', 'Mobile Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay'];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -48,6 +48,8 @@ class OptionsState extends MusicBeatState
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
 				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
+			case 'Mobile Controls':
+				MusicBeatState.switchState(new options.CustomControlsState());				
 		}
 	}
 
@@ -85,6 +87,10 @@ class OptionsState extends MusicBeatState
 
 		changeSelection();
 		ClientPrefs.saveSettings();
+
+		#if mobileC
+        addVirtualPad(FULL, A_B);
+        #end
 
 		super.create();
 	}

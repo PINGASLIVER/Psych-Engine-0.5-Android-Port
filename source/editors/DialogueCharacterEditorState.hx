@@ -146,6 +146,10 @@ class DialogueCharacterEditorState extends MusicBeatState
 		addEditorBox();
 		FlxG.mouse.visible = true;
 		updateCharTypeBox();
+
+		#if mobileC
+		addVirtualPad(FULL, B);
+		#end
 		
 		super.create();
 	}
@@ -244,10 +248,13 @@ class DialogueCharacterEditorState extends MusicBeatState
 		});
 		
 		animationInputText = new FlxUIInputText(15, 85, 80, '', 8);
+		animationInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;		
 		blockPressWhileTypingOn.push(animationInputText);
 		loopInputText = new FlxUIInputText(animationInputText.x, animationInputText.y + 35, 150, '', 8);
+		loopInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;		
 		blockPressWhileTypingOn.push(loopInputText);
 		idleInputText = new FlxUIInputText(loopInputText.x, loopInputText.y + 40, 150, '', 8);
+		idleInputText.focusGained = () -> FlxG.stage.window.textInputEnabled = true;		
 		blockPressWhileTypingOn.push(idleInputText);
 		
 		var addUpdateButton:FlxButton = new FlxButton(10, idleInputText.y + 30, "Add/Update", function() {
@@ -547,8 +554,21 @@ class DialogueCharacterEditorState extends MusicBeatState
 			if(UI_mainbox.selected_tab_id == 'Animations' && curSelectedAnim != null && character.dialogueAnimations.exists(curSelectedAnim)) {
 				var moved:Bool = false;
 				var animShit:DialogueAnimArray = character.dialogueAnimations.get(curSelectedAnim);
-				var controlArrayLoop:Array<Bool> = [FlxG.keys.justPressed.A, FlxG.keys.justPressed.W, FlxG.keys.justPressed.D, FlxG.keys.justPressed.S];
-				var controlArrayIdle:Array<Bool> = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.DOWN];
+
+				var controlArrayLoop:Array<Bool> = [
+					FlxG.keys.justPressed.A #if mobileC || _virtualpad.buttonLeft.justPressed #end,
+					FlxG.keys.justPressed.W #if mobileC || _virtualpad.buttonUp.justPressed #end, 
+					FlxG.keys.justPressed.D #if mobileC || _virtualpad.buttonRight.justPressed #end, 
+					FlxG.keys.justPressed.S #if mobileC || _virtualpad.buttonDown.justPressed #end
+				];
+
+				var controlArrayIdle:Array<Bool> = [
+					FlxG.keys.justPressed.LEFT #if mobileC || _virtualpad.buttonLeft.justPressed #end,
+					FlxG.keys.justPressed.UP #if mobileC || _virtualpad.buttonUp.justPressed #end,					
+					FlxG.keys.justPressed.RIGHT #if mobileC || _virtualpad.buttonRight.justPressed #end,
+					FlxG.keys.justPressed.DOWN #if mobileC || _virtualpad.buttonDown.justPressed #end
+				];							
+
 				for (i in 0...controlArrayLoop.length) {
 					if(controlArrayLoop[i]) {
 						if(i % 2 == 1) {
@@ -632,7 +652,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 				currentGhosts = 0;
 			}
 
-			if(FlxG.keys.justPressed.ESCAPE) {
+			if(FlxG.keys.justPressed.ESCAPE #if mobileC || _virtualpad.buttonB.justPressed #end) {
 				MusicBeatState.switchState(new editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
 				transitioning = true;
