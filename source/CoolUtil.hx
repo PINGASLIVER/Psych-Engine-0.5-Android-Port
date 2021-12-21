@@ -54,7 +54,7 @@ class CoolUtil
 	{
 		var daList:Array<String> = [];
 		
-		if(FileSystem.exists(Main.getDataPath() + path)) daList = File.getContent(path).trim().split('\n');
+		if(FileSystem.exists(path)) daList = File.getContent(path).trim().split('\n');
 
 		for (i in 0...daList.length)
 		{

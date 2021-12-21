@@ -24,8 +24,6 @@ class PauseSubState extends MusicBeatSubstate
 	var curSelected:Int = 0;
 
 	var pauseMusic:FlxSound;
-	var practiceText:FlxText;
-	//var botplayText:FlxText;
 
 	public static var transCamera:FlxCamera;
 
@@ -73,22 +71,6 @@ class PauseSubState extends MusicBeatSubstate
 		blueballedTxt.updateHitbox();
 		add(blueballedTxt);
 
-		practiceText = new FlxText(20, 15 + 101, 0, "PRACTICE MODE", 32);
-		practiceText.scrollFactor.set();
-		practiceText.setFormat(Paths.font('vcr.ttf'), 32);
-		practiceText.x = FlxG.width - (practiceText.width + 20);
-		practiceText.updateHitbox();
-		practiceText.visible = PlayState.instance.practiceMode;
-		add(practiceText);
-
-		/*botplayText = new FlxText(20, FlxG.height - 40, 0, "BOTPLAY", 32);
-		botplayText.scrollFactor.set();
-		botplayText.setFormat(Paths.font('vcr.ttf'), 32);
-		botplayText.x = FlxG.width - (botplayText.width + 20);
-		botplayText.updateHitbox();
-		botplayText.visible = PlayState.cpuControlled;
-		add(botplayText);*/
-
 		blueballedTxt.alpha = 0;
 		levelDifficulty.alpha = 0;
 		levelInfo.alpha = 0;
@@ -116,6 +98,15 @@ class PauseSubState extends MusicBeatSubstate
 		changeSelection();
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+
+		#if mobileC
+		addVirtualPad(UP_DOWN, A);
+		
+		var camcontrol = new FlxCamera();
+		FlxG.cameras.add(camcontrol);
+		camcontrol.bgColor.alpha = 0;
+		_virtualpad.cameras = [camcontrol];
+		#end		
 	}
 
 	override function update(elapsed:Float)
@@ -150,8 +141,7 @@ class PauseSubState extends MusicBeatSubstate
 					CustomFadeTransition.nextCamera = transCamera;
 					MusicBeatState.resetState();
 					FlxG.sound.music.volume = 0;
-					//PlayState.changedDifficulty = true;
-					//PlayState.cpuControlled = false;
+					PlayState.changedDifficulty = true;
 					return;
 				}
 			} 
@@ -163,18 +153,12 @@ class PauseSubState extends MusicBeatSubstate
 				case 'Change Difficulty':
 					menuItems = difficultyChoices;
 					regenMenu();
-				/*case 'Toggle Practice Mode':
-					PlayState.practiceMode = !PlayState.practiceMode;
-					PlayState.usedPractice = true;
-					practiceText.visible = PlayState.practiceMode;*/
+				case "Chart Editor":
+				    MusicBeatState.switchState(new editors.ChartingState());
 				case "Restart Song":
 					CustomFadeTransition.nextCamera = transCamera;
 					MusicBeatState.resetState();
 					FlxG.sound.music.volume = 0;
-				/*case 'Botplay':
-					PlayState.cpuControlled = !PlayState.cpuControlled;
-					PlayState.usedPractice = true;
-					botplayText.visible = PlayState.cpuControlled;*/
 				case "Exit to menu":
 					PlayState.deathCounter = 0;
 					PlayState.seenCutscene = false;
@@ -185,9 +169,7 @@ class PauseSubState extends MusicBeatSubstate
 						MusicBeatState.switchState(new FreeplayState());
 					}
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
-					/*PlayState.usedPractice = false;
 					PlayState.changedDifficulty = false;
-					PlayState.cpuControlled = false;*/
 
 				case 'BACK':
 					menuItems = menuItemsOG;

@@ -56,6 +56,10 @@ import DialogueBoxPsych;
 import sys.FileSystem;
 #end
 
+#if mobileC
+import ui.Mobilecontrols;
+#end
+
 using StringTools;
 
 class PlayState extends MusicBeatState
@@ -242,6 +246,10 @@ class PlayState extends MusicBeatState
 	var detailsText:String = "";
 	var detailsPausedText:String = "";
 	#end
+
+	#if mobileC
+	var mcontrols:Mobilecontrols; 
+	#end	
 
 	//Achievement shit
 	var keysPressed:Array<Bool> = [];
@@ -704,7 +712,7 @@ class PlayState extends MusicBeatState
 		// "GLOBAL" SCRIPTS
 		#if LUA_ALLOWED
 		var filesPushed:Array<String> = [];
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
+		var foldersToCheck:Array<String> = [Main.getDataPath() + Paths.getPreloadPath('scripts/')];
 
 		#if MODS_ALLOWED
 		foldersToCheck.insert(0, Paths.mods('scripts/'));
@@ -737,7 +745,7 @@ class PlayState extends MusicBeatState
 			luaFile = Paths.modFolders(luaFile);
 			doPush = true;
 		} else {
-			luaFile = Paths.getPreloadPath(luaFile);
+			luaFile = Main.getDataPath() + Paths.getPreloadPath(luaFile);
 			if(FileSystem.exists(luaFile)) {
 				doPush = true;
 			}
@@ -824,7 +832,7 @@ class PlayState extends MusicBeatState
 
 		var file:String = Paths.txt(songName + '/' + songName + 'Dialogue'); //Checks for vanilla/Senpai dialogue
 		if (OpenFlAssets.exists(file)) {
-			dialogue = CoolUtil.coolTextFile(file);
+			dialogue = CoolUtil.coolTextFile(Main.getDataPath() + file);
 		}
 		var doof:DialogueBox = new DialogueBox(false, dialogue);
 		// doof.x += 70;
@@ -907,7 +915,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			{
-				luaToLoad = Paths.getPreloadPath('custom_notetypes/' + notetype + '.lua');
+				luaToLoad = Main.getDataPath() + Paths.getPreloadPath('custom_notetypes/' + notetype + '.lua');
 				if(FileSystem.exists(luaToLoad))
 				{
 					luaArray.push(new FunkinLua(luaToLoad));
@@ -923,7 +931,7 @@ class PlayState extends MusicBeatState
 			}
 			else
 			{
-				luaToLoad = Paths.getPreloadPath('custom_events/' + event + '.lua');
+				luaToLoad = Main.getDataPath() + Paths.getPreloadPath('custom_events/' + event + '.lua');
 				if(FileSystem.exists(luaToLoad))
 				{
 					luaArray.push(new FunkinLua(luaToLoad));
@@ -1028,6 +1036,29 @@ class PlayState extends MusicBeatState
 		timeTxt.cameras = [camHUD];
 		doof.cameras = [camHUD];
 
+		#if mobileC
+			mcontrols = new Mobilecontrols();
+			switch (mcontrols.mode)
+			{
+				case VIRTUALPAD_RIGHT | VIRTUALPAD_LEFT | VIRTUALPAD_CUSTOM:
+					controls.setVirtualPadNOTES(mcontrols._virtualPad, FULL, NONE);
+				case HITBOX:
+					controls.setHitBoxNOTES(mcontrols._hitbox);
+				default:
+			}
+			trackedinputsNOTES = controls.trackedinputsNOTES;
+			controls.trackedinputsNOTES = [];
+
+			var camcontrol = new FlxCamera();
+			FlxG.cameras.add(camcontrol);
+			camcontrol.bgColor.alpha = 0;
+			mcontrols.cameras = [camcontrol];
+
+			mcontrols.visible = false;
+
+			add(mcontrols);
+		#end	
+
 		// if (SONG.song == 'South')
 		// FlxG.camera.alpha = 0.7;
 		// UI_camera.zoom = 1;
@@ -1039,7 +1070,7 @@ class PlayState extends MusicBeatState
 		// SONG SPECIFIC SCRIPTS
 		#if LUA_ALLOWED
 		var filesPushed:Array<String> = [];
-		var foldersToCheck:Array<String> = [Paths.getPreloadPath('data/' + Paths.formatToSongPath(SONG.song) + '/')];
+		var foldersToCheck:Array<String> = [Main.getDataPath() + Paths.getPreloadPath('data/' + Paths.formatToSongPath(SONG.song) + '/')];
 
 		#if MODS_ALLOWED
 		foldersToCheck.insert(0, Paths.mods('data/' + Paths.formatToSongPath(SONG.song) + '/'));
@@ -1245,7 +1276,7 @@ class PlayState extends MusicBeatState
 			luaFile = Paths.modFolders(luaFile);
 			doPush = true;
 		} else {
-			luaFile = Paths.getPreloadPath(luaFile);
+			luaFile = Main.getDataPath() + Paths.getPreloadPath(luaFile);
 			if(FileSystem.exists(luaFile)) {
 				doPush = true;
 			}
@@ -1270,11 +1301,45 @@ class PlayState extends MusicBeatState
 		char.x += char.positionArray[0];
 		char.y += char.positionArray[1];
 	}
-
+	
+	public function videoBG(name:String):Void { //this shit made by sirox
+		var existsFile:Bool = false;
+		var formattedPath:String = #if MODS_ALLOWED Paths.modFolders('videos/' + name + '.webm'); #else ''; #end
+		#if sys
+		if(FileSystem.exists(formattedPath)) {
+			existsFile = true;
+		}
+		#end
+		
+		if(!existsFile) {
+			formattedPath = Paths.video(name);
+			if(FileSystem.exists(formattedPath)) {
+				existsFile = true;
+			}
+		}
+		if(existsFile) {
+			var video = new WebmPlayerS(formattedPath, true);
+            video.startcallback = () -> {
+            	add(video);
+            	remove(dad);
+                remove(boyfriend);
+                remove(gf);
+                add(dad);
+                add(boyfriend);
+                add(gf);
+            }
+            video.setGraphicSize(FlxG.width);
+            video.updateHitbox();
+            video.play();
+		} else {
+			FlxG.log.warn('Couldnt find video file: ' + formattedPath);
+		}
+		return;
+	}
+	
 	public function startVideo(name:String):Void {
-		#if VIDEOS_ALLOWED
 		var foundFile:Bool = false;
-		var fileName:String = #if MODS_ALLOWED Paths.modFolders('videos/' + name + '.' + Paths.VIDEO_EXT); #else ''; #end
+		var fileName:String = #if MODS_ALLOWED Paths.modFolders('videos/' + name + '.webm'); #else ''; #end
 		#if sys
 		if(FileSystem.exists(fileName)) {
 			foundFile = true;
@@ -1283,35 +1348,37 @@ class PlayState extends MusicBeatState
 
 		if(!foundFile) {
 			fileName = Paths.video(name);
-			#if sys
 			if(FileSystem.exists(fileName)) {
-			#else
-			if(OpenFlAssets.exists(fileName)) {
-			#end
 				foundFile = true;
 			}
 		}
 
 		if(foundFile) {
 			inCutscene = true;
+
 			var bg = new FlxSprite(-FlxG.width, -FlxG.height).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
 			bg.scrollFactor.set();
 			bg.cameras = [camHUD];
 			add(bg);
 
-			(new FlxVideo(fileName)).finishCallback = function() {
-				remove(bg);
-				if(endingSong) {
-					endSong();
-				} else {
-					startCountdown();
-				}
-			}
+			var video = new WebmPlayerS(fileName, true);
+            video.endcallback = () -> {
+                remove(video);
+                remove(bg);
+                if(endingSong) {
+                    endSong();
+                } else {
+                    startCountdown();
+                }
+            }
+            video.setGraphicSize(FlxG.width);
+            video.updateHitbox();
+            add(video);
+            video.play();
 			return;
 		} else {
 			FlxG.log.warn('Couldnt find video file: ' + fileName);
 		}
-		#end
 		if(endingSong) {
 			endSong();
 		} else {
@@ -1454,6 +1521,9 @@ class PlayState extends MusicBeatState
 		inCutscene = false;
 		var ret:Dynamic = callOnLuas('onStartCountdown', []);
 		if(ret != FunkinLua.Function_Stop) {
+			#if mobileC
+		    mcontrols.visible = true;
+		    #end
 			generateStaticArrows(0);
 			generateStaticArrows(1);
 			for (i in 0...playerStrums.length) {
@@ -1673,12 +1743,8 @@ class PlayState extends MusicBeatState
 		var daBeats:Int = 0; // Not exactly representative of 'daBeats' lol, just how much it has looped
 
 		var songName:String = Paths.formatToSongPath(SONG.song);
-		var file:String = Paths.json(songName + '/events');
-		#if sys
+		var file:String = Main.getDataPath() + Paths.json(songName + '/events');
 		if (FileSystem.exists(Paths.modsJson(songName + '/events')) || FileSystem.exists(file)) {
-		#else
-		if (OpenFlAssets.exists(file)) {
-		#end
 			var eventsData:Array<Dynamic> = Song.loadFromJson('events', songName).events;
 			for (event in eventsData) //Event Notes
 			{
@@ -1714,6 +1780,7 @@ class PlayState extends MusicBeatState
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
 				swagNote.mustPress = gottaHitNote;
 				swagNote.sustainLength = songNotes[2];
+				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));				
 				swagNote.noteType = songNotes[3];
 				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
 				
@@ -2171,7 +2238,7 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
 		}
 
-		if (controls.PAUSE && startedCountdown && canPause)
+		if (controls.PAUSE #if android || FlxG.android.justReleased.BACK #end && startedCountdown && canPause)
 		{
 			var ret:Dynamic = callOnLuas('onPause', []);
 			if(ret != FunkinLua.Function_Stop) {
@@ -2522,11 +2589,12 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		#end
+		
 		setOnLuas('cameraX', camFollowPos.x);
 		setOnLuas('cameraY', camFollowPos.y);
 		setOnLuas('botPlay', cpuControlled);
 		callOnLuas('onUpdatePost', [elapsed]);
-		#end
 	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
@@ -3058,6 +3126,9 @@ class PlayState extends MusicBeatState
 			}
 		}
 		
+		#if mobileC
+		mcontrols.visible = false;
+		#end
 		timeBarBG.visible = false;
 		timeBar.visible = false;
 		timeTxt.visible = false;
@@ -3629,7 +3700,7 @@ class PlayState extends MusicBeatState
 		RecalculateRating();
 
 		var char:Character = boyfriend;
-		if(daNote.noteType == 'GF Sing') {
+		if(daNote.gfNote) {
 			char = gf;
 		}
 
@@ -3711,7 +3782,7 @@ class PlayState extends MusicBeatState
 
 			var char:Character = dad;
 			var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))] + altAnim;
-			if(SONG.notes[curSection].gfSection || note.noteType == 'GF Sing') {
+			if(SONG.notes[curSection].gfSection || note.gfNote) {
 				char = gf;
 			}
 
@@ -3783,7 +3854,7 @@ class PlayState extends MusicBeatState
 	
 				var animToPlay:String = singAnimations[Std.int(Math.abs(note.noteData))];
 
-				if(note.noteType == 'GF Sing') {
+				if(note.gfNote) {
 					gf.playAnim(animToPlay + daAlt, true);
 					gf.holdTimer = 0;
 				} else {

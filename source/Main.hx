@@ -40,7 +40,7 @@ class Main extends Sprite
             } 
             else 
             {
-                Application.current.window.alert("couldn't find directory: " + "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "try creating it","an ERROR occured");
+                Application.current.window.alert("couldn't find directory: " + "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "try creating it and copying assets/assets, assets/mods from apk to it","an ERROR occured");
                 dataPath = System.applicationStorageDirectory;
             }
             #else

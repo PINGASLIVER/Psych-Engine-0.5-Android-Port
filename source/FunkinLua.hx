@@ -38,8 +38,8 @@ import Discord;
 using StringTools;
 
 class FunkinLua {
-	public static var Function_Stop = 1;
-	public static var Function_Continue = 0;
+    public static var Function_Stop = "Function_Stop";
+	public static var Function_Continue = "Function_Continue";
 
 	#if LUA_ALLOWED
 	public var lua:State = null;
@@ -76,8 +76,8 @@ class FunkinLua {
 		#end
 
 		// Lua shit
-		set('Function_Stop', Function_Stop);
-		set('Function_Continue', Function_Continue);
+        set('Function_Stop', "Function_Stop");
+        set('Function_Continue', "Function_Continue");
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
 		set('inChartEditor', false);
@@ -173,7 +173,7 @@ class FunkinLua {
 				cervix = Paths.modFolders(cervix);
 				doPush = true;
 			} else {
-				cervix = Paths.getPreloadPath(cervix);
+				cervix = Main.getDataPath() + Paths.getPreloadPath(cervix);
 				if(FileSystem.exists(cervix)) {
 					doPush = true;
 				}
@@ -1076,19 +1076,19 @@ class FunkinLua {
 			}
 		});
 		Lua_helper.add_callback(lua, "startVideo", function(videoFile:String) {
-			#if VIDEOS_ALLOWED
 			if(FileSystem.exists(Paths.video(videoFile))) {
 				PlayState.instance.startVideo(videoFile);
 			} else {
 				luaTrace('Video file not found: ' + videoFile);
 			}
-			#else
-			if(PlayState.instance.endingSong) {
-				PlayState.instance.endSong();
+		});
+		
+		Lua_helper.add_callback(lua, "videoBG", function(videoFile:String) { //shit for videobg in luas (sirox)
+			if(FileSystem.exists(Paths.video(videoFile))) {
+				PlayState.instance.videoBG(videoFile);
 			} else {
-				PlayState.instance.startCountdown();
+				luaTrace('Video file not found: ' + videoFile);
 			}
-			#end
 		});
 		
 		Lua_helper.add_callback(lua, "playMusic", function(sound:String, volume:Float = 1, loop:Bool = false) {
