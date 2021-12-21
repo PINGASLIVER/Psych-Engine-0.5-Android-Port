@@ -753,6 +753,8 @@ class DialogueCharacterEditorState extends MusicBeatState
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data, characterName + ".json");
 		}
+
+                openfl.system.System.setClipboard(data.trim());
 	}
 
 	function onSaveComplete(_):Void
