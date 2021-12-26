@@ -462,7 +462,7 @@ class WeekEditorState extends MusicBeatState
 	
 	public static var loadedWeek:WeekFile = null;
 	public static var loadError:Bool = false;
-	private function LoadCheck():Void
+	private static function LoadCheck():Void
 	{
 	        var path:String = Main.getDataPath() + "yourthings/yourweek.json";
 		if (FileSystem.exists(path))
@@ -474,7 +474,7 @@ class WeekEditorState extends MusicBeatState
 				{
 					loadError = false;
 
-					weekFileName = weekFile.weekName;
+					weekFileName = loadedWeek.weekName;//maybe will work
 					return;
 				}
 			}
