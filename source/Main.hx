@@ -100,9 +100,14 @@ class Main extends Sprite
                 if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/"))
                 FileSystem.createDirectory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/");
 
-                if (!FileSystem.exists(Main.dataPath() + "assets") && !FileSystem.exists(Main.dataPath() + "mods"))
+                if (!FileSystem.exists(Main.dataPath() + "assets"))
                 {
-                    Application.current.window.alert("Try copying assets/assets and assets/mods from apk to " + "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App");
+                    Application.current.window.alert("Try copying assets/assets from apk to " + "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App");
+                    System.exit(0);//Will close the game
+                }
+                else if (!FileSystem.exists(Main.dataPath() + "mods"))
+                {
+                    Application.current.window.alert("Try copying assets/mods from apk to " + "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App");
                     System.exit(0);//Will close the game
                 }
                 #end
