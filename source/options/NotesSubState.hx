@@ -179,7 +179,7 @@ class NotesSubState extends MusicBeatSubstate
 
 		if (controls.BACK || (changingNote && controls.ACCEPT)) {
 			if(!changingNote) {
-				close();//will no longer crash the game
+				MusicBeatState.resetState();//FUCK
 			} else {
 				changeSelection();
 			}
