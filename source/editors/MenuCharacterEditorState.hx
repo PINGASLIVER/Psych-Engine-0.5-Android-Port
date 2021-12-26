@@ -22,10 +22,8 @@ import flixel.addons.ui.FlxUITabMenu;
 import flixel.ui.FlxButton;
 import MenuCharacter;
 import haxe.Json;
-#if sys
 import sys.io.File;
-import sys.FileSystem
-#end
+import sys.FileSystem;
 
 using StringTools;
 
