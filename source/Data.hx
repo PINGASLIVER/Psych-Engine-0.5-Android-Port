@@ -11,7 +11,7 @@ class Data
 	private static var dataPath1:String = null;
 	private static var dataPath2:String = null;
 	
-    function getPath1():String 
+    static public function getPath1():String 
     {
         if (dataPath1 != null && dataPath1.length > 0) 
         {
@@ -24,7 +24,7 @@ class Data
         return dataPath1;
     }
     
-    function getPath2():String 
+    static public function getPath2():String 
     {
         if (dataPath2 != null && dataPath2.length > 0) 
         {
