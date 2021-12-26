@@ -37,8 +37,8 @@ class Data
         return dataPath2;
     }    
 
-	public static function init():Void
-	{
+    public static function init():Void
+    {
         AndroidTools.requestPermission(Permissions.READ_EXTERNAL_STORAGE);
         AndroidTools.requestPermission(Permissions.WRITE_EXTERNAL_STORAGE);
 
@@ -58,5 +58,5 @@ class Data
             Application.current.window.alert("Try copying assets/mods from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
             System.exit(0);//Will close the game
         }
-	}
+    }
 }
