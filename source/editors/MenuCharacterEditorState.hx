@@ -343,8 +343,6 @@ class MenuCharacterEditorState extends MusicBeatState
 				var loadedChar:MenuCharacterFile = cast Json.parse(rawJson);
 				if(loadedChar.idle_anim != null && loadedChar.confirm_anim != null) //Make sure it's really a character
 				{
-					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					trace("Successfully loaded file: " + cutName);
 					characterFile = loadedChar;
 					reloadSelectedCharacter();
 					imageInputText.text = characterFile.image;
