@@ -116,8 +116,8 @@ class Main extends Sprite
                 }
                 else
                 {
-                    if (!FileSystem.exists(Main.dataPath() + "yourthings"))
-	            FileSystem.createDirectory(Main.dataPath() + "yourthings");                   
+                    if (!FileSystem.exists(Main.getDataPath() + "yourthings"))
+	            FileSystem.createDirectory(Main.getDataPath() + "yourthings");                   
                 }
                 #end
 
