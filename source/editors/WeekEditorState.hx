@@ -474,7 +474,7 @@ class WeekEditorState extends MusicBeatState
 				{
 					loadError = false;
 
-					weekFileName = WeekFile.weekName;
+					weekFileName = weekFile.weekName;
 					return;
 				}
 			}
