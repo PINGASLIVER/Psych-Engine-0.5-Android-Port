@@ -95,10 +95,10 @@ class Main extends Sprite
                 AndroidTools.requestPermission(Permissions.WRITE_EXTERNAL_STORAGE);
 
                 if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
-                FileSystem.createDirectrory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName"));
+                FileSystem.createDirectory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName"));
 
                 if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/"))
-                FileSystem.createDirectrory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/");
+                FileSystem.createDirectory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/");
 
                 if (!FileSystem.exists(Main.dataPath() + "assets") || !FileSystem.exists(Main.dataPath() + "mods"))
                 {
