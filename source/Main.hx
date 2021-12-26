@@ -91,19 +91,7 @@ class Main extends Sprite
 		#end
 
                 #if android
-                AndroidTools.requestPermission(Permissions.READ_EXTERNAL_STORAGE);
-                AndroidTools.requestPermission(Permissions.WRITE_EXTERNAL_STORAGE);
-
-                if (!FileSystem.exists(Main.getDataPath() + "assets"))
-                {
-                    Application.current.window.alert("Try copying assets/assets from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
-                    System.exit(0);//Will close the game
-                }
-                else if (!FileSystem.exists(Main.getDataPath() + "mods"))
-                {
-                    Application.current.window.alert("Try copying assets/mods from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
-                    System.exit(0);//Will close the game
-                }
+                Data.init();
                 #end
 
 		ClientPrefs.loadDefaultKeys();
