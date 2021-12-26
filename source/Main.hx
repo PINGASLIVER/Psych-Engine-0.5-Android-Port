@@ -93,12 +93,6 @@ class Main extends Sprite
                 #if android
                 AndroidTools.requestPermission(Permissions.READ_EXTERNAL_STORAGE);
 
-                //if (!FileSystem.exists(getPath2 + Application.current.meta.get("packageName")))
-                    //FileSystem.createDirectory(getPath2 + Application.current.meta.get("packageName"));        
-
-                //if (!FileSystem.exists(getPath1 + "/files/"))
-                    //FileSystem.createDirectory(getPath1 + "/files/");
-
                 //For Stupid Kids
                 if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
                 {
