@@ -23,10 +23,8 @@ import flixel.ui.FlxButton;
 import haxe.Json;
 import DialogueBoxPsych;
 import lime.system.Clipboard;
-#if sys
 import sys.io.File;
-import sus.FileSystem
-#end
+import sys.FileSystem;
 
 using StringTools;
 
