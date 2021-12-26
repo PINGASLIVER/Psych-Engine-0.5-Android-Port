@@ -667,14 +667,15 @@ class DialogueCharacterEditorState extends MusicBeatState
                 var path:String = Main.getDataPath() + "yourthings/yourdialoguecharacter.json";
 		if (FileSystem.exists(path))
                 {
-                    File.getContent(path);
-                    LoadCheck(path);
+                    LoadCheck();
                 }
 	}
 
-	function LoadCheck(fullpath:String):Void
+	function LoadCheck():Void
 	{
-		if(fullPath != null) {
+		var path:String = Main.getDataPath() + "yourthings/yourdialoguecharacter.json";
+		if (FileSystem.exists(path))
+                {
 			var rawJson:String = File.getContent(fullPath);
 			if(rawJson != null) {
 				var loadedChar:DialogueCharacterFile = cast Json.parse(rawJson);
