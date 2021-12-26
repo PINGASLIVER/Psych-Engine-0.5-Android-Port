@@ -11,6 +11,7 @@ import openfl.events.Event;
 import sys.FileSystem;
 import lime.app.Application;
 import lime.system.System;
+import android.*;
 
 class Main extends Sprite
 {
@@ -25,30 +26,22 @@ class Main extends Sprite
 	public static var fpsVar:FPS;
 	private static var dataPath:String = null;
 
-    static public function getDataPath():String 
-    {
-        if (dataPath != null && dataPath.length > 0) 
+        static public function getDataPath():String 
         {
-            return dataPath;
-        } 
-        else 
-        {
-        	#if mobile
-            if (FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/")) 
+            if (dataPath != null && dataPath.length > 0) 
             {
-                dataPath = "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/";
+                return dataPath;
             } 
             else 
             {
-                Application.current.window.alert("couldn't find directory: " + "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "try creating it and copying assets/assets, assets/mods from apk to it","an ERROR occured");
-                dataPath = System.applicationStorageDirectory;
+                 #if android
+                 dataPath = "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/";
+                 #elseif desktop
+                 dataPath = "";
+                 #end
             }
-            #else
-                dataPath = "";
-            #end
+            return dataPath;
         }
-        return dataPath;
-    }
 
 	public static function main():Void
 	{
@@ -96,6 +89,23 @@ class Main extends Sprite
 		#if !debug
 		initialState = TitleState;
 		#end
+
+                #if android
+                AndroidTools.requestPermission(Permissions.READ_EXTERNAL_STORAGE);
+                AndroidTools.requestPermission(Permissions.WRITE_EXTERNAL_STORAGE);
+
+                if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
+                FileSystem.createDirectrory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName"));
+
+                if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/"))
+                FileSystem.createDirectrory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/");
+
+                if (!FileSystem.exists(Main.dataPath() + "assets") || !FileSystem.exists(Main.dataPath() + "mods"))
+                {
+                    Application.current.window.alert("Try copying assets/assets and assets/mods from apk to it" + "\n" + "Press Ok To Close The App");
+                    System.exit(0);//Restart the game
+                }
+                #end
 
 		ClientPrefs.loadDefaultKeys();
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
