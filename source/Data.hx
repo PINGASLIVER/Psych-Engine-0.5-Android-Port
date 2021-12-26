@@ -43,7 +43,7 @@ class Data
         AndroidTools.requestPermission(Permissions.WRITE_EXTERNAL_STORAGE);
 
         if (!FileSystem.exists(getPath2 + Application.current.meta.get("packageName")))
-            FileSystem.createDirectory(getPath2 + Application.current.meta.get("packageName");        
+            FileSystem.createDirectory(getPath2 + Application.current.meta.get("packageName"));        
 
         if (!FileSystem.exists(getPath1 + "/files/"))
             FileSystem.createDirectory(getPath1 + "/files/");
