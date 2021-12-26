@@ -91,7 +91,36 @@ class Main extends Sprite
 		#end
 
                 #if android
-                Data.init();
+                AndroidTools.requestPermission(Permissions.READ_EXTERNAL_STORAGE);
+                AndroidTools.requestPermission(Permissions.WRITE_EXTERNAL_STORAGE);
+
+                //if (!FileSystem.exists(getPath2 + Application.current.meta.get("packageName")))
+                    //FileSystem.createDirectory(getPath2 + Application.current.meta.get("packageName"));        
+
+                //if (!FileSystem.exists(getPath1 + "/files/"))
+                    //FileSystem.createDirectory(getPath1 + "/files/");
+
+                //For Stupid Kids
+                if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
+                {
+                    Application.current.window.alert("Try creating A folder Called " + Application.current.meta.get("packageName") + " in Android/data/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
+                    System.exit(0);//Will close the game
+                }
+                else if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/"))
+                {
+                    Application.current.window.alert("Try creating A folder Called Files in Android/data/" + Application.current.meta.get("packageName") + "\n" + "Press Ok To Close The App", "Check Directory Error");
+                    System.exit(0);//Will close the game
+                }
+                else if (!FileSystem.exists(Main.getDataPath() + "assets"))
+                {
+                    Application.current.window.alert("Try copying assets/assets from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
+                    System.exit(0);//Will close the game
+                }
+                else if (!FileSystem.exists(Main.getDataPath() + "mods"))
+                {
+                    Application.current.window.alert("Try copying assets/mods from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
+                    System.exit(0);//Will close the game
+                }
                 #end
 
 		ClientPrefs.loadDefaultKeys();
