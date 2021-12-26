@@ -114,6 +114,11 @@ class Main extends Sprite
                     Application.current.window.alert("Try copying assets/mods from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
+                else
+                {
+                    if (!FileSystem.exists(Main.dataPath() + "yourthings"))
+	            FileSystem.createDirectory(Main.dataPath() + "yourthings");                   
+                }
                 #end
 
 		ClientPrefs.loadDefaultKeys();
