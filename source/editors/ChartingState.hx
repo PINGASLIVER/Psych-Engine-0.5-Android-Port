@@ -33,8 +33,6 @@ import flixel.util.FlxColor;
 import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
 import openfl.utils.ByteArray;
 import openfl.utils.Assets as OpenFlAssets;
@@ -81,8 +79,6 @@ class ChartingState extends MusicBeatState
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
 		['Change Scroll Speed', "Value 1: Target value\nValue 2: Time it takes to change fully"]
 	];
-
-	var _file:FileReference;
 
 	var UI_box:FlxUITabMenu;
 
