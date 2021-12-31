@@ -38,7 +38,7 @@ class Main extends Sprite
             } 
             else 
             {
-                 dataPath = "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/";
+                 dataPath = storageDir + "/Android/data/" + Application.current.meta.get("packageName") + "/files/";//Thanks again Sirox
             }
             return dataPath;
             #end
