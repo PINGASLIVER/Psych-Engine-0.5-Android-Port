@@ -11,7 +11,8 @@ import openfl.events.Event;
 import sys.FileSystem;
 import lime.app.Application;
 import lime.system.System;
-import android.*;
+import android.AndroidTools;
+import android.Permissions;
 
 class Main extends Sprite
 {
@@ -24,23 +25,23 @@ class Main extends Sprite
 	var startFullscreen:Bool = false; // Whether to start the game in fullscreen on desktop targets
 
 	public static var fpsVar:FPS;
+
+        var storageDir:String = AndroidTools.getExternalStoragwDirectory;
 	private static var dataPath:String = null;
 
         static public function getDataPath():String 
         {
+            #if android
             if (dataPath != null && dataPath.length > 0) 
             {
                 return dataPath;
             } 
             else 
             {
-                 #if android
                  dataPath = "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/";
-                 #elseif desktop
-                 dataPath = "";
-                 #end
             }
             return dataPath;
+            #end
         }
 
 	public static function main():Void
@@ -91,18 +92,15 @@ class Main extends Sprite
 		#end
 
                 #if android
-                AndroidTools.requestPermission(Permissions.READ_EXTERNAL_STORAGE);
+                AndroidTools.requestPermissions([Permissions.READ_EXTERNAL_STORAGE, Permissions.WRITE_EXTERNAL_STORAGE]);
 
-                //For Stupid Kids
-                if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
+                if (!FileSystem.isDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName")))
                 {
-                    Application.current.window.alert("Try creating A folder Called " + Application.current.meta.get("packageName") + " in Android/data/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
-                    System.exit(0);//Will close the game
+                     FileSystem.createDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName"));
                 }
-                else if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/"))
+                else if (!FileSystem.isDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName") + "/files"))
                 {
-                    Application.current.window.alert("Try creating A folder Called Files in Android/data/" + Application.current.meta.get("packageName") + "\n" + "Press Ok To Close The App", "Check Directory Error");
-                    System.exit(0);//Will close the game
+                     FileSystem.createDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName") + "/files");
                 }
                 else if (!FileSystem.exists(Main.getDataPath() + "assets"))
                 {
