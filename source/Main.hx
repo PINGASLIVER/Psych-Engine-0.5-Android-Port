@@ -94,27 +94,29 @@ class Main extends Sprite
                 #if android
                 AndroidTools.requestPermissions([Permissions.READ_EXTERNAL_STORAGE, Permissions.WRITE_EXTERNAL_STORAGE]);
 
-                if (!FileSystem.isDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName")))
+                if (!FileSystem.isDirectory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
                 {
-                     FileSystem.createDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName"));
+                    Application.current.window.alert("Try creating A folder Called " + Application.current.meta.get("packageName") + " in Android/data/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
+                    System.exit(0);//Will close the game
                 }
-                else if (!FileSystem.isDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName") + "/files"))
+                else if (!FileSystem.isDirectory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files"))
                 {
-                     FileSystem.createDirectory(storageDir + "/Android/data/" + Application.current.meta.get("packageName") + "/files");
+                    Application.current.window.alert("Try creating A folder Called Files in Android/data/" + Application.current.meta.get("packageName") + "\n" + "Press Ok To Close The App", "Check Directory Error");
+                    System.exit(0);//Will close the game
                 }
-                else if (!FileSystem.exists(Main.getDataPath() + "assets"))
+                else if (!FileSystem.isDirectory(Main.getDataPath() + "assets"))
                 {
                     Application.current.window.alert("Try copying assets/assets from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
-                else if (!FileSystem.exists(Main.getDataPath() + "mods"))
+                else if (!FileSystem.isDirectory(Main.getDataPath() + "mods"))
                 {
                     Application.current.window.alert("Try copying assets/mods from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
                 else
                 {
-                    if (!FileSystem.exists(Main.getDataPath() + "yourthings"))
+                    if (!FileSystem.isDirectory(Main.getDataPath() + "yourthings"))
 	            FileSystem.createDirectory(Main.getDataPath() + "yourthings");                   
                 }
                 #end
