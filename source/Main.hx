@@ -26,7 +26,7 @@ class Main extends Sprite
 
 	public static var fpsVar:FPS;
 
-        var storageDir:String = AndroidTools.getExternalStoragwDirectory;
+        var storageDir:String = AndroidTools.getExternalStorageDirectory;
 	private static var dataPath:String = null;
 
         static public function getDataPath():String 
