@@ -140,7 +140,7 @@ class Paths
 			return file;
 		}
 		#end
-		return 'assets/videos/$key.mp4';
+		return 'assets/videos/$key.html';
 	}
 
 	static public function sound(key:String, ?library:String):Dynamic
@@ -345,7 +345,7 @@ class Paths
 	}
 
 	inline static public function modsVideo(key:String) {
-		return 'mods/' + currentModDirectoryvideos + '/ + key + '.mp4';//lmao
+		return 'mods/' + currentModDirectoryvideos + '/ + key + '.html';//lmao
 	}
 
 	inline static public function modsMusic(key:String) {
