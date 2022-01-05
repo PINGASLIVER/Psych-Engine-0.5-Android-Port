@@ -140,7 +140,7 @@ class Paths
 			return file;
 		}
 		#end
-		return Main.getDataPath() + 'assets/videos/$key.webm';
+		return 'assets/videos/$key.mp4';
 	}
 
 	static public function sound(key:String, ?library:String):Dynamic
@@ -266,7 +266,7 @@ class Paths
 			return file;
 		}
 		#end
-		return 'assets/fonts/$key';
+		return Main.getDataPath() + 'assets/fonts/$key';
 	}
 
 	inline static public function fileExists(key:String, type:AssetType, ?ignoreMods:Bool = false, ?library:String)
@@ -345,7 +345,7 @@ class Paths
 	}
 
 	inline static public function modsVideo(key:String) {
-		return modFolders('videos/' + key + '.webm');
+		return 'mods/' + currentModDirectoryvideos + '/ + key + '.mp4';//lmao
 	}
 
 	inline static public function modsMusic(key:String) {
