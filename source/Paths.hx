@@ -346,7 +346,7 @@ class Paths
 
 	inline static public function modsVideo(key:String) {
                 if(currentModDirectory != null && currentModDirectory.length > 0) {
-			var fileToCheck:String = mods(currentModDirectory + '/videos' + key + '.html');
+			var fileToCheck:String = 'mods/' + currentModDirectory + '/videos' + key + '.html');
 			if(FileSystem.exists(fileToCheck)) {
 				return fileToCheck;
 			}
