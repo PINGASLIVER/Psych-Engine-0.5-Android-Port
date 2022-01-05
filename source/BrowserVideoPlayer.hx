@@ -10,30 +10,22 @@ using StringTools;
 
 class BrowserVideoPlayer extends FlxBasic
 {
-	public static var androidPath:String = 'file:///android_asset/';
+	public static var androidPath:String = 'file:///Android/data/' + lime.app.Application.current.meta.get("packageName") + ' /files/';
+        //Thanks Alot Sirox
+        public var finishCallback:Void->Void = null;
 
-	public static var source1:String = 'assets/videos/';
-
-    public var finishCallback:Void->Void = null;
-
-	public function new(source:String)
+	public function new(path:String)
 	{
 		super();
 
 		WebView.onClose = onClose;
 		WebView.onURLChanging= onURLChanging;
 
-		WebView.open(androidPath + source1 + source + '.html', false, null, ['http://exitme(.*)']);
+		WebView.open(androidPath + path, false, null, ['http://exitme(.*)']);
 	}
 
 	public override function update(dt:Float) 
 	{
-       if(FlxG.android.justReleased.BACK)
-      {
-         if(finishCallback != null) 
-         	finishCallback();
-      }
-
 		super.update(dt);	
 	}
 
