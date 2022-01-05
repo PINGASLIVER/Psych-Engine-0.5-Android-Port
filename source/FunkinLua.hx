@@ -1083,13 +1083,7 @@ class FunkinLua {
 			}
 		});
 		
-		Lua_helper.add_callback(lua, "videoBG", function(videoFile:String) { //shit for videobg in luas (sirox)
-			if(FileSystem.exists(Paths.video(videoFile))) {
-				PlayState.instance.videoBG(videoFile);
-			} else {
-				luaTrace('Video file not found: ' + videoFile);
-			}
-		});
+		
 		
 		Lua_helper.add_callback(lua, "playMusic", function(sound:String, volume:Float = 1, loop:Bool = false) {
 			FlxG.sound.playMusic(Paths.music(sound), volume, loop);
