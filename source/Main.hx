@@ -100,7 +100,7 @@ class Main extends Sprite
                     Application.current.window.alert("Try creating A folder Called Files in Android/data/" + Application.current.meta.get("packageName") + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
-                else if !FileSystem.exists(Main.getDataPath() + "assets"))
+                else if (!FileSystem.exists(Main.getDataPath() + "assets"))
                 {
                     Application.current.window.alert("Try copying assets/assets from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
