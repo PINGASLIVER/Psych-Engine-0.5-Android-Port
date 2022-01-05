@@ -345,7 +345,13 @@ class Paths
 	}
 
 	inline static public function modsVideo(key:String) {
-		return 'mods/' + currentModDirectoryvideos + '/ + key + '.html';//lmao
+                if(currentModDirectory != null && currentModDirectory.length > 0) {
+			var fileToCheck:String = mods(currentModDirectory + '/videos' + key + '.html');
+			if(FileSystem.exists(fileToCheck)) {
+				return fileToCheck;
+			}
+		}
+		return 'mods/videos' + key + '.html';
 	}
 
 	inline static public function modsMusic(key:String) {
