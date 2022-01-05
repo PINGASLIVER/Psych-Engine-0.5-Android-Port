@@ -119,7 +119,7 @@
 	<haxelib name="flixel-addons" />
 	<haxelib name="hscript" />
 
-	<haxelib name="extension-webm" unless="html5"/> 
+	<haxelib name="extension-webview" if="android"/> 
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />
