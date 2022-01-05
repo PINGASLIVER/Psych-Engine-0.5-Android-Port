@@ -11,8 +11,6 @@ import openfl.events.Event;
 import sys.FileSystem;
 import lime.app.Application;
 import lime.system.System;
-import android.AndroidTools;
-import android.Permissions;
 
 class Main extends Sprite
 {
@@ -26,7 +24,6 @@ class Main extends Sprite
 
 	public static var fpsVar:FPS;
 
-        private static var storageDir:String = AndroidTools.getExternalStorageDirectory();
 	private static var dataPath:String = null;
 
         static public function getDataPath():String 
@@ -38,7 +35,7 @@ class Main extends Sprite
             } 
             else 
             {
-                 dataPath = storageDir + "/Android/data/" + Application.current.meta.get("packageName") + "/files/";//Thanks again Sirox
+                 dataPath = "/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/";
             }
             return dataPath;
             #end
@@ -92,31 +89,30 @@ class Main extends Sprite
 		#end
 
                 #if android
-                AndroidTools.requestPermissions([Permissions.READ_EXTERNAL_STORAGE, Permissions.WRITE_EXTERNAL_STORAGE]);
 
-                if (!FileSystem.isDirectory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
+                if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName")))
                 {
                     Application.current.window.alert("Try creating A folder Called " + Application.current.meta.get("packageName") + " in Android/data/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
-                else if (!FileSystem.isDirectory("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files"))
+                else if (!FileSystem.exists("/storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files"))
                 {
                     Application.current.window.alert("Try creating A folder Called Files in Android/data/" + Application.current.meta.get("packageName") + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
-                else if (!FileSystem.isDirectory(Main.getDataPath() + "assets"))
+                else if !FileSystem.exists(Main.getDataPath() + "assets"))
                 {
                     Application.current.window.alert("Try copying assets/assets from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
-                else if (!FileSystem.isDirectory(Main.getDataPath() + "mods"))
+                else if (!FileSystem.exists(Main.getDataPath() + "mods"))
                 {
                     Application.current.window.alert("Try copying assets/mods from apk to " + " /storage/emulated/0/Android/data/" + Application.current.meta.get("packageName") + "/files/" + "\n" + "Press Ok To Close The App", "Check Directory Error");
                     System.exit(0);//Will close the game
                 }
                 else
                 {
-                    if (!FileSystem.isDirectory(Main.getDataPath() + "yourthings"))
+                    if (!FileSystem.exists(Main.getDataPath() + "yourthings"))
 	            FileSystem.createDirectory(Main.getDataPath() + "yourthings");                   
                 }
                 #end
