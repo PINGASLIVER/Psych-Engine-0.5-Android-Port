@@ -344,7 +344,7 @@ class Paths
 		return modFolders('data/' + key + '.json');
 	}
 
-	inline static public function modsVideo(key:String) {
+	static public function modsVideo(key:String) {
                 if(currentModDirectory != null && currentModDirectory.length > 0) {
 			var fileToCheck:String = 'mods/' + currentModDirectory + '/videos/' + key + '.html';
 			if(FileSystem.exists(Main.getDataPath() + fileToCheck)) {
