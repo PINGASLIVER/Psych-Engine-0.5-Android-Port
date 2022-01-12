@@ -10,8 +10,7 @@ using StringTools;
 
 class BrowserVideoPlayer extends FlxBasic
 {
-	public static var androidPath:String = 'file://;// ok
-        //Thanks Alot Sirox
+	public static var androidPath:String = 'file://';//ok
         public var finishCallback:Void->Void = null;
 
 	public function new(path:String)
