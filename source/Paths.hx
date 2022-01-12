@@ -140,7 +140,7 @@ class Paths
 			return file;
 		}
 		#end
-		return 'assets/videos/$key.html';
+		return Main.getDataPath() + 'assets/videos/$key.html';
 	}
 
 	static public function sound(key:String, ?library:String):Dynamic
@@ -345,13 +345,7 @@ class Paths
 	}
 
 	static public function modsVideo(key:String) {
-                if(currentModDirectory != null && currentModDirectory.length > 0) {
-			var fileToCheck:String = 'mods/' + currentModDirectory + '/videos/' + key + '.html';
-			if(FileSystem.exists(Main.getDataPath() + fileToCheck)) {
-				return fileToCheck;
-			}
-		}
-		return 'mods/videos' + key + '.html';
+                return modFolders('videos/' + key + '.' + SOUND_EXT);
 	}
 
 	inline static public function modsMusic(key:String) {
