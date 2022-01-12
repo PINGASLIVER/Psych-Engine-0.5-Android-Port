@@ -10,7 +10,7 @@ using StringTools;
 
 class BrowserVideoPlayer extends FlxBasic
 {
-	public static var androidPath:String = 'file:///Android/data/' + lime.app.Application.current.meta.get("packageName") + ' /files/';
+	public static var androidPath:String = 'file://;// ok
         //Thanks Alot Sirox
         public var finishCallback:Void->Void = null;
 
