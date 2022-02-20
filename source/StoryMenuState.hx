@@ -6,7 +6,7 @@ import Discord.DiscordClient;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
-import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.transition.FlxTransitionableState; // appearently its visual studio code
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup;
@@ -53,9 +53,8 @@ class StoryMenuState extends MusicBeatState
 
 	override function create()
 	{
-		#if MODS_ALLOWED
-		Paths.destroyLoadedImages();
-		#end
+		Paths.clearStoredMemory();
+		Paths.clearUnusedMemory();
 
 		PlayState.isStoryMode = true;
 		WeekData.reloadWeekFiles(true);
@@ -181,10 +180,6 @@ class StoryMenuState extends MusicBeatState
 
 		changeWeek();
 
-		#if mobileC
-        addVirtualPad(FULL, A_B_X_Y);
-        #end		
-
 		super.create();
 	}
 
@@ -239,12 +234,12 @@ class StoryMenuState extends MusicBeatState
 			else if (upP || downP)
 				changeDifficulty();
 
-			if(FlxG.keys.justPressed.CONTROL#if mobileC || _virtualpad.buttonY.justPressed #end)
+			if(FlxG.keys.justPressed.CONTROL)
 			{
 				persistentUpdate = false;
 				openSubState(new GameplayChangersSubstate());
 			}
-			else if(controls.RESET#if mobileC || _virtualpad.buttonX.justPressed #end)
+			else if(controls.RESET)
 			{
 				persistentUpdate = false;
 				openSubState(new ResetScoreSubState('', curDifficulty, '', curWeek));
