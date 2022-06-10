@@ -3,31 +3,74 @@ package;
 import flixel.FlxG;
 
 using StringTools;
-
 class Highscore
 {
 	#if (haxe >= "4.0.0")
-	public static var weekScores:Map<String, Int> = new Map();
 	public static var songScores:Map<String, Int> = new Map();
-	public static var songRating:Map<String, Float> = new Map();
+	public static var songCombos:Map<String, String> = new Map();
 	#else
-	public static var weekScores:Map<String, Int> = new Map();
 	public static var songScores:Map<String, Int> = new Map<String, Int>();
-	public static var songRating:Map<String, Float> = new Map<String, Float>();
+	public static var songCombos:Map<String, Int> = new Map<String, String>();
 	#end
 
 
-	public static function resetSong(song:String, diff:Int = 0):Void
+	public static function saveScore(song:String, score:Int = 0, ?diff:Int = 0):Void
 	{
 		var daSong:String = formatSong(song, diff);
-		setScore(daSong, 0);
-		setRating(daSong, 0);
+
+
+		#if !switch
+		NGio.postScore(score, song);
+		#end
+
+		if(!FlxG.save.data.botplay)
+		{
+			if (songScores.exists(daSong))
+			{
+				if (songScores.get(daSong) < score)
+					setScore(daSong, score);
+			}
+			else
+				setScore(daSong, score);
+		}else trace('BotPlay detected. Score saving is disabled.');
 	}
 
-	public static function resetWeek(week:String, diff:Int = 0):Void
+	public static function saveCombo(song:String, combo:String, ?diff:Int = 0):Void
 	{
-		var daWeek:String = formatSong(week, diff);
-		setWeekScore(daWeek, 0);
+		var daSong:String = formatSong(song, diff);
+		var finalCombo:String = combo.split(')')[0].replace('(', '');
+
+		if(!FlxG.save.data.botplay)
+		{
+			if (songCombos.exists(daSong))
+			{
+				if (getComboInt(songCombos.get(daSong)) < getComboInt(finalCombo))
+					setCombo(daSong, finalCombo);
+			}
+			else
+				setCombo(daSong, finalCombo);
+		}
+	}
+
+	public static function saveWeekScore(week:Int = 1, score:Int = 0, ?diff:Int = 0):Void
+	{
+
+		#if !switch
+		NGio.postScore(score, "Week " + week);
+		#end
+
+		if(!FlxG.save.data.botplay)
+		{
+			var daWeek:String = formatSong('week' + week, diff);
+
+			if (songScores.exists(daWeek))
+			{
+				if (songScores.get(daWeek) < score)
+					setScore(daWeek, score);
+			}
+			else
+				setScore(daWeek, score);
+		}else trace('BotPlay detected. Score saving is disabled.');
 	}
 
 	public static function floorDecimal(value:Float, decimals:Int):Float
@@ -46,35 +89,6 @@ class Highscore
 		return newValue / tempMult;
 	}
 
-	public static function saveScore(song:String, score:Int = 0, ?diff:Int = 0, ?rating:Float = -1):Void
-	{
-		var daSong:String = formatSong(song, diff);
-
-		if (songScores.exists(daSong)) {
-			if (songScores.get(daSong) < score) {
-				setScore(daSong, score);
-				if(rating >= 0) setRating(daSong, rating);
-			}
-		}
-		else {
-			setScore(daSong, score);
-			if(rating >= 0) setRating(daSong, rating);
-		}
-	}
-
-	public static function saveWeekScore(week:String, score:Int = 0, ?diff:Int = 0):Void
-	{
-		var daWeek:String = formatSong(week, diff);
-
-		if (weekScores.exists(daWeek))
-		{
-			if (weekScores.get(daWeek) < score)
-				setWeekScore(daWeek, score);
-		}
-		else
-			setWeekScore(daWeek, score);
-	}
-
 	/**
 	 * YOU SHOULD FORMAT SONG WITH formatSong() BEFORE TOSSING IN SONG VARIABLE
 	 */
@@ -85,67 +99,88 @@ class Highscore
 		FlxG.save.data.songScores = songScores;
 		FlxG.save.flush();
 	}
-	static function setWeekScore(week:String, score:Int):Void
-	{
-		// Reminder that I don't need to format this song, it should come formatted!
-		weekScores.set(week, score);
-		FlxG.save.data.weekScores = weekScores;
-		FlxG.save.flush();
-	}
 
-	static function setRating(song:String, rating:Float):Void
+	static function setCombo(song:String, combo:String):Void
 	{
 		// Reminder that I don't need to format this song, it should come formatted!
-		songRating.set(song, rating);
-		FlxG.save.data.songRating = songRating;
+		songCombos.set(song, combo);
+		FlxG.save.data.songCombos = songCombos;
 		FlxG.save.flush();
 	}
 
 	public static function formatSong(song:String, diff:Int):String
 	{
-		return Paths.formatToSongPath(song) + CoolUtil.getDifficultyFilePath(diff);
+		var daSong:String = song;
+
+		if (diff == 0)
+			daSong += '-easy';
+		else if (diff == 2)
+		{
+			if (PlayState.isBETADCIU && song == 'triple-trouble')
+				daSong += '-betadciu';
+			else
+				daSong += '-hard';
+		}
+		else if (diff == 3)
+			daSong += '-neo';
+		else if (diff == 4)
+			daSong += '-vitor';
+		else if (diff == 5)
+			daSong += '-guest';
+
+		return daSong;
+	}
+
+	static function getComboInt(combo:String):Int
+	{
+		switch(combo)
+		{
+			case 'SDCB':
+				return 1;
+			case 'FC':
+				return 2;
+			case 'GFC':
+				return 3;
+			case 'MFC':
+				return 4;
+			default:
+				return 0;
+		}
 	}
 
 	public static function getScore(song:String, diff:Int):Int
 	{
-		var daSong:String = formatSong(song, diff);
-		if (!songScores.exists(daSong))
-			setScore(daSong, 0);
+		if (!songScores.exists(formatSong(song, diff)))
+			setScore(formatSong(song, diff), 0);
 
-		return songScores.get(daSong);
+		return songScores.get(formatSong(song, diff));
 	}
 
-	public static function getRating(song:String, diff:Int):Float
+	public static function getCombo(song:String, diff:Int):String
 	{
-		var daSong:String = formatSong(song, diff);
-		if (!songRating.exists(daSong))
-			setRating(daSong, 0);
+		if (!songCombos.exists(formatSong(song, diff)))
+			setCombo(formatSong(song, diff), '');
 
-		return songRating.get(daSong);
+		return songCombos.get(formatSong(song, diff));
 	}
 
-	public static function getWeekScore(week:String, diff:Int):Int
+	public static function getWeekScore(week:Int, diff:Int):Int
 	{
-		var daWeek:String = formatSong(week, diff);
-		if (!weekScores.exists(daWeek))
-			setWeekScore(daWeek, 0);
+		if (!songScores.exists(formatSong('week' + week, diff)))
+			setScore(formatSong('week' + week, diff), 0);
 
-		return weekScores.get(daWeek);
+		return songScores.get(formatSong('week' + week, diff));
 	}
 
 	public static function load():Void
 	{
-		if (FlxG.save.data.weekScores != null)
-		{
-			weekScores = FlxG.save.data.weekScores;
-		}
 		if (FlxG.save.data.songScores != null)
 		{
 			songScores = FlxG.save.data.songScores;
 		}
-		if (FlxG.save.data.songRating != null)
+		if (FlxG.save.data.songCombos != null)
 		{
-			songRating = FlxG.save.data.songRating;
+			songCombos = FlxG.save.data.songCombos;
 		}
 	}
 }

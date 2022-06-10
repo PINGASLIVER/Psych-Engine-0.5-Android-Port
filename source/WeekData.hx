@@ -1,6 +1,6 @@
 package;
 
-#if MODS_ALLOWED
+#if desktop
 import sys.io.File;
 import sys.FileSystem;
 #end
@@ -25,6 +25,9 @@ typedef WeekFile =
 	var hideStoryMode:Bool;
 	var hideFreeplay:Bool;
 	var difficulties:String;
+
+	//for guest betadcius
+	var ytInfo:Array<Dynamic>;
 }
 
 class WeekData {
@@ -45,6 +48,8 @@ class WeekData {
 	public var hideFreeplay:Bool;
 	public var difficulties:String;
 
+	public var ytInfo:Array<Dynamic>;
+
 	public static function createWeekFile():WeekFile {
 		var weekFile:WeekFile = {
 			songs: [["Bopeebo", "dad", [146, 113, 253]], ["Fresh", "dad", [146, 113, 253]], ["Dad Battle", "dad", [146, 113, 253]]],
@@ -57,6 +62,7 @@ class WeekData {
 			startUnlocked: true,
 			hideStoryMode: false,
 			hideFreeplay: false,
+			ytInfo: ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", 'snow', 0xFFB94545],
 			difficulties: ''
 		};
 		return weekFile;
@@ -75,17 +81,81 @@ class WeekData {
 		hideStoryMode = weekFile.hideStoryMode;
 		hideFreeplay = weekFile.hideFreeplay;
 		difficulties = weekFile.difficulties;
+
+		if (weekFile.ytInfo == null)
+			weekFile.ytInfo = ["Snow The Fox", "https://www.youtube.com/c/SnowTheFox", 'snow', 0xFFB94545]; //template
+
+		ytInfo = weekFile.ytInfo;
 	}
 
-	public static function reloadWeekFiles(isStoryMode:Null<Bool> = false)
+	public static function reloadWeekFiles(isStoryMode:Null<Bool> = false, ?menuNo:Int = 0)
 	{
 		weeksList = [];
 		weeksLoaded.clear();
-		#if MODS_ALLOWED
+
+		#if desktop
 		var disabledMods:Array<String> = [];
-		var modsListPath:String = Main.getDataPath() + 'modsList.txt';
-		var directories:Array<String> = [Paths.mods(), Main.getDataPath() + Paths.getPreloadPath()];
+		var modsListPath:String = 'modsList.txt';
+		var directories:Array<String> = [Paths.mods(), Paths.getPreloadPath()];
 		var originalLength:Int = directories.length;
+
+		switch(menuNo)
+		{
+			case 0: disabledMods.push('BETADCIU');//freeplay. continue checking but skip all BETADCIU stuff.
+			case 1 | 2 | 3 | 4 | 5:
+			{
+				var suf:String = "";
+
+				switch (menuNo)
+				{
+					case 1: suf = '-betadciu'; //BETADCIU menu.
+					case 2: suf = '-bonus'; //Bonus Songs Menu
+					case 3: suf = '-neonight'; //Neonight Menu
+					case 4: suf = '-vitor'; //Vitor Menu
+					case 5: suf = '-guest'; //Other BETADCIU creators menu.
+				}
+				#if desktop
+				var directory:String = Paths.modFolders('BETADCIU') + '/weeks/';
+				var i:Int = 0;
+				var curI:Int = 0;
+
+				if(FileSystem.exists(directory)) {
+					var listOfWeeks:Array<String> = [];
+	
+					if (FileSystem.exists(directory + 'weekList.txt'))
+						listOfWeeks = CoolUtil.coolTextFile(directory + 'weekList.txt');
+	
+					for (daWeek in listOfWeeks)
+					{
+						var path:String = directory + daWeek + '.json';
+
+						if(sys.FileSystem.exists(path) && path.endsWith(suf+'.json'))
+						{
+							addWeek(daWeek, path, Paths.modFolders('BETADCIU') + '/', i, 0);
+						}
+					}
+
+					for (file in FileSystem.readDirectory(directory))
+					{
+						var path = haxe.io.Path.join([directory, file]);
+						if (!sys.FileSystem.isDirectory(path) && file.endsWith(suf+'.json'))
+						{
+							addWeek(file.substr(0, file.length - 5), path, Paths.modFolders('BETADCIU') + '/', i, 0);
+						}
+
+						curI++;
+
+						if (curI % 3 == 0)
+							i++;
+					}
+				}
+				#end
+			}
+		}
+
+		if (menuNo != 0)
+			return;
+
 		if(FileSystem.exists(modsListPath))
 		{
 			var stuff:Array<String> = CoolUtil.coolTextFile(modsListPath);
@@ -124,7 +194,7 @@ class WeekData {
 		var originalLength:Int = directories.length;
 		#end
 
-		var sexList:Array<String> = CoolUtil.coolTextFile(Main.getDataPath() + Paths.getPreloadPath('weeks/weekList.txt'));
+		var sexList:Array<String> = CoolUtil.coolTextFile(Paths.getPreloadPath('weeks/weekList.txt'));
 		for (i in 0...sexList.length) {
 			for (j in 0...directories.length) {
 				var fileToCheck:String = directories[j] + 'weeks/' + sexList[i] + '.json';
@@ -133,7 +203,7 @@ class WeekData {
 					if(week != null) {
 						var weekFile:WeekData = new WeekData(week);
 
-						#if MODS_ALLOWED
+						#if desktop
 						if(j >= originalLength) {
 							weekFile.folder = directories[j].substring(Paths.mods().length, directories[j].length-1);
 						}
@@ -148,11 +218,15 @@ class WeekData {
 			}
 		}
 
-		#if MODS_ALLOWED
+		#if desktop
 		for (i in 0...directories.length) {
 			var directory:String = directories[i] + 'weeks/';
 			if(FileSystem.exists(directory)) {
-				var listOfWeeks:Array<String> = CoolUtil.coolTextFile(directory + 'weekList.txt');
+				var listOfWeeks:Array<String> = [];
+
+				if (FileSystem.exists(directory + 'weekList.txt'))
+					listOfWeeks = CoolUtil.coolTextFile(directory + 'weekList.txt');
+
 				for (daWeek in listOfWeeks)
 				{
 					var path:String = directory + daWeek + '.json';
@@ -175,6 +249,7 @@ class WeekData {
 		#end
 	}
 
+
 	private static function addWeek(weekToCheck:String, path:String, directory:String, i:Int, originalLength:Int)
 	{
 		if(!weeksLoaded.exists(weekToCheck))
@@ -185,9 +260,10 @@ class WeekData {
 				var weekFile:WeekData = new WeekData(week);
 				if(i >= originalLength)
 				{
+					#if desktop
 					weekFile.folder = directory.substring(Paths.mods().length, directory.length-1);
+					#end
 				}
-
 				if((PlayState.isStoryMode && !weekFile.hideStoryMode) || (!PlayState.isStoryMode && !weekFile.hideFreeplay))
 				{
 					weeksLoaded.set(weekToCheck, weekFile);
@@ -199,9 +275,15 @@ class WeekData {
 
 	private static function getWeekFile(path:String):WeekFile {
 		var rawJson:String = null;
+		#if desktop
 		if(FileSystem.exists(path)) {
 			rawJson = File.getContent(path);
 		}
+		#else
+		if(OpenFlAssets.exists(path)) {
+			rawJson = Assets.getText(path);
+		}
+		#end
 
 		if(rawJson != null && rawJson.length > 0) {
 			return cast Json.parse(rawJson);

@@ -23,7 +23,6 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.FlxGraphic;
-import flixel.FlxCamera;
 import Controls;
 
 using StringTools;
@@ -40,12 +39,23 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 	function getOptions()
 	{
+		var goption:GameplayOption = new GameplayOption('Scroll Type', 'scrolltype', 'string', 'multiplicative', ["multiplicative", "constant"]);
+		optionsArray.push(goption);
+
 		var option:GameplayOption = new GameplayOption('Scroll Speed', 'scrollspeed', 'float', 1);
 		option.scrollSpeed = 1.5;
 		option.minValue = 0.5;
-		option.maxValue = 3;
 		option.changeValue = 0.1;
-		option.displayFormat = '%vX';
+		if (goption.getValue() != "constant")
+		{
+			option.displayFormat = '%vX';
+			option.maxValue = 3;
+		}
+		else
+		{
+			option.displayFormat = "%v";
+			option.maxValue = 6;
+		}
 		optionsArray.push(option);
 
 		/*var option:GameplayOption = new GameplayOption('Playback Rate', 'songspeed', 'float', 1);
@@ -80,6 +90,17 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		var option:GameplayOption = new GameplayOption('Botplay', 'botplay', 'bool', false);
 		optionsArray.push(option);
+	}
+
+	public function getOptionByName(name:String)
+	{
+		for(i in optionsArray)
+		{
+			var opt:GameplayOption = i;
+			if (opt.name == name)
+				return opt;
+		}
+		return null;
 	}
 
 	public function new()
@@ -133,15 +154,6 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 		changeSelection();
 		reloadCheckboxes();
-
-		#if mobileC
-		addVirtualPad(FULL, A_B);
-		
-		var camcontrol = new FlxCamera();
-		FlxG.cameras.add(camcontrol);
-		camcontrol.bgColor.alpha = 0;
-		_virtualpad.cameras = [camcontrol];
-		#end	
 	}
 
 	var nextAccept:Int = 5;
@@ -159,9 +171,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		}
 
 		if (controls.BACK) {
+			close();
 			ClientPrefs.saveSettings();
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			MusicBeatState.resetState();
 		}
 
 		if(nextAccept <= 0)
@@ -222,6 +234,26 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 
 									curOption.curOption = num;
 									curOption.setValue(curOption.options[num]); //lol
+									
+									if (curOption.name == "Scroll Type")
+									{
+										var oOption:GameplayOption = getOptionByName("Scroll Speed");
+										if (oOption != null)
+										{
+											if (curOption.getValue() == "constant")
+											{
+												oOption.displayFormat = "%v";
+												oOption.maxValue = 6;
+											}
+											else
+											{
+												oOption.displayFormat = "%vX";
+												oOption.maxValue = 3;
+												if(oOption.getValue() > 3) oOption.setValue(3);
+											}
+											updateTextFrom(oOption);
+										}
+									}
 									//trace(curOption.options[num]);
 							}
 							updateTextFrom(curOption);
@@ -264,6 +296,17 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 						if(leOption.type == 'string')
 						{
 							leOption.curOption = leOption.options.indexOf(leOption.getValue());
+						}
+						updateTextFrom(leOption);
+					}
+
+					if(leOption.name == 'Scroll Speed')
+					{
+						leOption.displayFormat = "%vX";
+						leOption.maxValue = 3;
+						if(leOption.getValue() > 3)
+						{
+							leOption.setValue(3);
 						}
 						updateTextFrom(leOption);
 					}
