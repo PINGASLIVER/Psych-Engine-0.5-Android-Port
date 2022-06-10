@@ -1,6 +1,7 @@
 package;
 
 import flixel.FlxSprite;
+import flixel.FlxG;
 
 using StringTools;
 
@@ -26,7 +27,7 @@ class AttachedSprite extends FlxSprite
 		} else if(file != null) {
 			loadGraphic(Paths.image(file));
 		}
-		antialiasing = ClientPrefs.globalAntialiasing;
+		antialiasing = FlxG.save.data.antialiasing;
 		scrollFactor.set();
 	}
 

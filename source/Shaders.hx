@@ -1,6 +1,7 @@
 package;
 
 // STOLEN FROM HAXEFLIXEL DEMO LOL
+//Am I even allowed to use this?
 import flixel.system.FlxAssets.FlxShader;
 import openfl.display.BitmapData;
 import openfl.display.Shader;
@@ -48,6 +49,145 @@ class BuildingShader extends FlxShader
   }
 }
 
+class SketchShader extends FlxShader
+{
+	@:glFragmentSource("
+	/* 
+		Author: Daniel Taylor
+		License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+
+		Tried my hand at a sketch-looking shader.
+
+		I'm sure that someone has used this exact method before, but oh well. I like to 
+		think that this one is very readable (aka I'm not very clever with optimizations).
+		There's little noise in the background, which is a good sign, however it's easy to
+		create a scenerio that tricks it (the 1961 Commerical video is a good example).
+		Also, text (or anything thin) looks really bad on it, don't really know how to fix
+		that.
+
+		Also, if the Shadertoy devs are reading this, the number one feature request that
+		I have is a time slider. Instead of waiting for the entire video to loop back to
+		the end, be able to fast forward to a specific part. It'd really help, I swear.
+
+		Previous work:
+		https://www.shadertoy.com/view/XtVGD1 - the grandaddy of all sketch shaders, by flockaroo
+	*/
+
+	#define PI2 6.28318530717959
+
+	#define RANGE 16.
+	#define STEP 2.
+	#define ANGLENUM 4.
+
+	// Grayscale mode! This is for if you didn't like drawing with colored pencils as a kid
+	#define GRAYSCALE.
+
+	// Here's some magic numbers, and two groups of settings that I think looks really nice. 
+	// Feel free to play around with them!
+
+	#define MAGIC_GRAD_THRESH 0.01
+
+	// Setting group 1:
+	/*#define MAGIC_SENSITIVITY     4.
+	#define MAGIC_COLOR           1.*/
+
+	// Setting group 2:
+	#define MAGIC_SENSITIVITY     10.
+	#define MAGIC_COLOR           0.5
+
+	//---------------------------------------------------------
+	// Your usual image functions and utility stuff
+	//---------------------------------------------------------
+	vec4 getCol(vec2 pos)
+	{
+		vec2 uv = pos / iResolution.xy;
+		return texture(iChannel0, uv);
+	}
+
+	float getVal(vec2 pos)
+	{
+		vec4 c=getCol(pos);
+		return dot(c.xyz, vec3(0.2126, 0.7152, 0.0722));
+	}
+
+	vec2 getGrad(vec2 pos, float eps)
+	{
+		vec2 d=vec2(eps,0);
+		return vec2(
+			getVal(pos+d.xy)-getVal(pos-d.xy),
+			getVal(pos+d.yx)-getVal(pos-d.yx)
+		)/eps/2.;
+	}
+
+	void pR(inout vec2 p, float a) {
+		p = cos(a)*p + sin(a)*vec2(p.y, -p.x);
+	}
+	float absCircular(float t)
+	{
+		float a = floor(t + 0.5);
+		return mod(abs(a - t), 1.0);
+	}
+
+	//---------------------------------------------------------
+	// Let's do this!
+	//---------------------------------------------------------
+	void main()
+	{   
+		vec2 pos = ${SketchShader.vTexCoord}.xy;
+		float weight = 1.0;
+		
+		for (float j = 0.; j < ANGLENUM; j += 1.)
+		{
+			vec2 dir = vec2(1, 0);
+			pR(dir, j * PI2 / (2. * ANGLENUM));
+			
+			vec2 grad = vec2(-dir.y, dir.x);
+			
+			for (float i = -RANGE; i <= RANGE; i += STEP)
+			{
+				vec2 pos2 = pos + normalize(dir)*i;
+				
+				// video texture wrap can't be set to anything other than clamp  (-_-)
+				if (pos2.y < 0. || pos2.x < 0. || pos2.x > iResolution.x || pos2.y > iResolution.y)
+					continue;
+				
+				vec2 g = getGrad(pos2, 1.);
+				if (length(g) < MAGIC_GRAD_THRESH)
+					continue;
+				
+				weight -= pow(abs(dot(normalize(grad), normalize(g))), MAGIC_SENSITIVITY) / floor((2. * RANGE + 1.) / STEP) / ANGLENUM;
+			}
+		}
+		
+	#ifndef GRAYSCALE
+		vec4 col = getCol(pos);
+	#else
+		vec4 col = vec4(getVal(pos));
+	#endif
+		
+		vec4 background = mix(col, vec4(1), MAGIC_COLOR);
+		
+		// I couldn't get this to look good, but I guess it's almost obligatory at this point...
+		/*float distToLine = absCircular(fragCoord.y / (iResolution.y/8.));
+		background = mix(vec4(0.6,0.6,1,1), background, smoothstep(0., 0.03, distToLine));*/
+		
+		
+		// because apparently all shaders need one of these. It's like a law or something.
+		float r = length(pos - iResolution.xy*.5) / iResolution.x;
+		float vign = 1. - r*r*r;
+		
+		vec4 a = texture(iChannel1, pos/iResolution.xy);
+		
+		gl_FragColor = vign * mix(vec4(0), background, weight) + a.xxxx/25.;
+		//fragColor = getCol(pos);
+	}
+	")
+	public function new()
+	{
+		super();
+	}
+}
+
 class ChromaticAberrationShader extends FlxShader
 {
 	@:glFragmentSource('
@@ -74,6 +214,14 @@ class ChromaticAberrationShader extends FlxShader
 	{
 		super();
 	}
+}
+
+class SketchEffect extends Effect
+{
+	public var shader:SketchShader;
+  public function new(){
+	shader = new SketchShader();
+  }
 }
 
 class ChromaticAberrationEffect extends Effect
@@ -245,27 +393,20 @@ class GreyscaleShader extends FlxShader{
 	@:glFragmentSource('
 	#pragma header
 	void main() {
-		vec4 color = texture2D(bitmap, openfl_TextureCoordv);
-		float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-		gl_FragColor = vec4(vec3(gray), color.a);
+
+	vec2 uv = openfl_TextureCoordv;
+
+	vec4 tex = flixel_texture2D(bitmap, uv);
+	vec3 greyScale = vec3(.3, .587, .114);
+	gl_FragColor = vec4( vec3(dot( tex.rgb, greyScale)), tex.a);
+
 	}
-	
-	
 	')
 	
 	public function new(){
 		super();
-	}
-	
-	
-	
+	}	
 }
-
-
-
-
-
-
 
 class GrainEffect extends Effect {
 	
@@ -620,7 +761,215 @@ class VCRDistortionShader extends FlxShader // https://www.shadertoy.com/view/ld
   }
 }
 
+class VCRDistortionEffect2 extends Effect //the one used for tails doll
+{
+  public var shader:VCRDistortionShader2 = new VCRDistortionShader2();
+  public function new(){
+	shader.scanlinesOn.value = [true];
+  }
+}
 
+
+class VCRDistortionShader2 extends FlxShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
+{
+
+  @:glFragmentSource('
+    #pragma header
+
+    uniform float iTime;
+    uniform bool vignetteOn;
+    uniform bool perspectiveOn;
+    uniform bool distortionOn;
+    uniform bool scanlinesOn;
+    uniform bool vignetteMoving;
+    uniform sampler2D noiseTex;
+    uniform float glitchModifier;
+    uniform vec3 iResolution;
+
+    float onOff(float a, float b, float c)
+    {
+    	return step(c, sin(iTime + a*cos(iTime*b)));
+    }
+
+    float ramp(float y, float start, float end)
+    {
+    	float inside = step(start,y) - step(end,y);
+    	float fact = (y-start)/(end-start)*inside;
+    	return (1.-fact) * inside;
+
+    }
+
+    vec4 getVideo(vec2 uv)
+      {
+      	vec2 look = uv;
+        if(distortionOn){
+        	float window = 1./(1.+20.*(look.y-mod(iTime/4.,1.))*(look.y-mod(iTime/4.,1.)));
+        	look.x = look.x + (sin(look.y*10. + iTime)/50.*onOff(4.,4.,.3)*(1.+cos(iTime*80.))*window)*(glitchModifier*2.);
+        	float vShift = 0.4*onOff(2.,3.,.9)*(sin(iTime)*sin(iTime*20.) +
+        										 (0.5 + 0.1*sin(iTime*200.)*cos(iTime)));
+        	look.y = mod(look.y + vShift*glitchModifier, 1.);
+        }
+      	vec4 video = flixel_texture2D(bitmap,look);
+
+      	return video;
+      }
+
+    vec2 screenDistort(vec2 uv)
+    {
+      if(perspectiveOn){
+        uv = (uv - 0.5) * 2.0;
+      	uv *= 1.1;
+      	uv.x *= 1.0 + pow((abs(uv.y) / 5.0), 2.0);
+      	uv.y *= 1.0 + pow((abs(uv.x) / 4.0), 2.0);
+      	uv  = (uv / 2.0) + 0.5;
+      	uv =  uv *0.92 + 0.04;
+      	return uv;
+      }
+    	return uv;
+    }
+    float random(vec2 uv)
+    {
+     	return fract(sin(dot(uv, vec2(15.5151, 42.2561))) * 12341.14122 * sin(iTime * 0.03));
+    }
+    float noise(vec2 uv)
+    {
+     	vec2 i = floor(uv);
+        vec2 f = fract(uv);
+
+        float a = random(i);
+        float b = random(i + vec2(1.,0.));
+    	float c = random(i + vec2(0., 1.));
+        float d = random(i + vec2(1.));
+
+        vec2 u = smoothstep(0., 1., f);
+
+        return mix(a,b, u.x) + (c - a) * u.y * (1. - u.x) + (d - b) * u.x * u.y;
+
+    }
+
+
+    vec2 scandistort(vec2 uv) {
+    	float scan1 = clamp(cos(uv.y * 2.0 + iTime), 0.0, 1.0);
+    	float scan2 = clamp(cos(uv.y * 2.0 + iTime + 4.0) * 10.0, 0.0, 1.0) ;
+    	float amount = scan1 * scan2 * uv.x;
+
+    	uv.x -= 0.05 * mix(flixel_texture2D(noiseTex, vec2(uv.x, amount)).r * amount, amount, 0.9);
+
+    	return uv;
+
+    }
+    void main()
+    {
+    	vec2 uv = openfl_TextureCoordv;
+      vec2 curUV = screenDistort(uv);
+    	uv = scandistort(curUV);
+    	vec4 video = getVideo(uv);
+      float vigAmt = 1.0;
+      float x =  0.;
+
+
+      video.r = getVideo(vec2(x+uv.x+0.001,uv.y+0.001)).x+0.05;
+      video.g = getVideo(vec2(x+uv.x+0.000,uv.y-0.002)).y+0.05;
+      video.b = getVideo(vec2(x+uv.x-0.002,uv.y+0.000)).z+0.05;
+      video.r += 0.08*getVideo(0.75*vec2(x+0.025, -0.027)+vec2(uv.x+0.001,uv.y+0.001)).x;
+      video.g += 0.05*getVideo(0.75*vec2(x+-0.022, -0.02)+vec2(uv.x+0.000,uv.y-0.002)).y;
+      video.b += 0.08*getVideo(0.75*vec2(x+-0.02, -0.018)+vec2(uv.x-0.002,uv.y+0.000)).z;
+
+      video = clamp(video*0.6+0.4*video*video*1.0,0.0,1.0);
+      if(vignetteMoving)
+    	  vigAmt = 3.+.3*sin(iTime + 5.*cos(iTime*5.));
+
+    	float vignette = (1.-vigAmt*(uv.y-.5)*(uv.y-.5))*(1.-vigAmt*(uv.x-.5)*(uv.x-.5));
+
+      if(vignetteOn)
+    	 video *= vignette;
+
+
+      gl_FragColor = mix(video,vec4(noise(uv * 75.)),.05);
+
+      if(curUV.x<0. || curUV.x>1. || curUV.y<0. || curUV.y>1.){
+        gl_FragColor = vec4(0,0,0,0);
+      }
+
+    }
+  ')
+  public function new()
+  {
+    super();
+  }
+}
+
+class RGBShiftGlitchEffect extends Effect
+{
+	public var shader:RGBShiftGlitchShader;
+	public function new(amplitude:Float = 0.1, speed:Float = 0.1){
+		shader = new RGBShiftGlitchShader();
+		shader.amplitude.value = [amplitude];
+		shader.speed.value = [speed];
+		shader.iTime.value = [0];
+		PlayState.instance.shaderUpdates.push(update);
+	}
+
+	public function update(elapsed:Float){
+		shader.iTime.value[0] += elapsed;
+		shader.iResolution.value = [Lib.current.stage.stageWidth,Lib.current.stage.stageHeight];
+	}
+
+}
+
+class RGBShiftGlitchShader extends FlxShader //https://www.shadertoy.com/view/4t23Rc#	
+{
+	@glFragmentSource("
+	#pragma header
+
+	uniform float amplitude;
+	uniform float speed;
+	uniform float iTime;
+    uniform vec3 iResolution;
+
+	vec4 rgbShift( in vec2 p , in vec4 shift) {
+		shift *= 2.0*shift.w - 1.0;
+		vec2 rs = vec2(shift.x,-shift.y);
+		vec2 gs = vec2(shift.y,-shift.z);
+		vec2 bs = vec2(shift.z,-shift.x);
+		
+		float r = texture2D(bitmap, p+rs, 0.0).x;
+		float g = texture2D(bitmap, p+gs, 0.0).y;
+		float b = texture2D(bitmap, p+bs, 0.0).z;
+		
+		return vec4(r,g,b,1.0);
+	}
+
+	vec4 noise( in vec2 p ) {
+		return texture2D(bitmap, p, 0.0);
+	}
+
+	vec4 vec4pow( in vec4 v, in float p ) {
+		// Don't touch alpha (w), we use it to choose the direction of the shift
+		// and we don't want it to go in one direction more often than the other
+		return vec4(pow(v.x,p),pow(v.y,p),pow(v.z,p),v.w); 
+	}
+
+	void main()
+	{
+		vec2 p = openfl_TextureCoordv;
+		vec4 c = vec4(0.0,0.0,0.0,1.0);
+		
+		// Elevating shift values to some high power (between 8 and 16 looks good)
+		// helps make the stuttering look more sudden
+		vec4 shift = vec4pow(noise(vec2(speed*iTime,2.0*speed*iTime/25.0 )),8.0)
+					*vec4(amplitude,amplitude,amplitude,1.0);;
+		
+		c += rgbShift(p, shift);
+		
+		gl_FragColor = c;
+	}")
+
+	public function new()
+	{
+		super();
+	}
+}
 
 class ThreeDEffect extends Effect{
 	
@@ -1137,9 +1486,9 @@ class PulseEffect extends Effect
 
 class InvertColorsEffect extends Effect
 {
-    public var shader:InvertShader = new InvertShader();
-	public function new(lockAlpha){
-	//	shader.lockAlpha.value = [lockAlpha];
+    public var shader:InvertShader;
+	public function new(){
+		shader = new InvertShader();
 	}
 
 }
@@ -1198,18 +1547,20 @@ class InvertShader extends FlxShader
     @:glFragmentSource('
     #pragma header
     
-    vec4 sineWave(vec4 pt)
-    {
-	
-	return vec4(1.0 - pt.x, 1.0 - pt.y, 1.0 - pt.z, pt.w);
-    }
+	void main()
+	{
+		vec2 uv = openfl_TextureCoordv;
+		vec4 color = texture2D(bitmap, uv).rgba;
+		vec4 toUse = texture2D(bitmap, openfl_TextureCoordv).rgba;
+		
+		toUse.r = 1.0 - color.r;
+		toUse.g = 1.0 - color.g;
+		toUse.b = 1.0 - color.b;
+		toUse.a = color.a;
+		toUse.w = color.w;
 
-    void main()
-    {
-        vec2 uv = openfl_TextureCoordv;
-        gl_FragColor = sineWave(texture2D(bitmap, uv));
-		gl_FragColor.a = 1.0 - gl_FragColor.a;
-    }')
+		gl_FragColor = toUse;
+	}')
 
     public function new()
     {
@@ -1217,7 +1568,53 @@ class InvertShader extends FlxShader
     }
 }
 
+class OutlineEffect extends Effect
+{
+    public var shader:OutlineShader;
+	public function new(size:Float, r:Float, g:Float, b:Float){
+		shader = new OutlineShader();
+		shader.outlineSize.value = [size];
+		shader.r.value = [r];
+		shader.g.value = [g];
+		shader.b.value = [b];
+	}
+ 
+}
 
+class OutlineShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+	uniform float outlineSize;
+	uniform float r;
+	uniform float g;
+	uniform float b;
+
+	vec4 color = texture2D(bitmap, openfl_TextureCoordv);
+	const float BORDER_WIDTH = 1.5;
+	float w = BORDER_WIDTH / openfl_TextureSize.x;
+	float h = BORDER_WIDTH / openfl_TextureSize.y;
+
+	if (color.a == 0.) {
+	  if (texture2D(bitmap, vec2(openfl_TextureCoordv.x + w, openfl_TextureCoordv.y)).a != 0.
+	  || texture2D(bitmap, vec2(openfl_TextureCoordv.x - w, openfl_TextureCoordv.y)).a != 0.
+	  || texture2D(bitmap, vec2(openfl_TextureCoordv.x, openfl_TextureCoordv.y + h)).a != 0.
+	  || texture2D(bitmap, vec2(openfl_TextureCoordv.x, openfl_TextureCoordv.y - h)).a != 0.) {
+		gl_FragColor = vec4(r, g, b, 0.8);
+	  } else {
+		gl_FragColor = color;
+	  }
+	} else {
+	  gl_FragColor = color;
+	}
+  }')
+
+    public function new()
+    {
+       super();
+    }
+}
 
 class DistortBGShader extends FlxShader
 {

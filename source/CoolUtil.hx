@@ -1,21 +1,28 @@
 package;
 
-import flixel.FlxG;
-import openfl.utils.Assets;
-import lime.utils.Assets as LimeAssets;
-import lime.utils.AssetLibrary;
-import lime.utils.AssetManifest;
+import flash.display.BitmapData;
+import lime.utils.Assets;
+import tjson.TJSON;
+import lime.app.Application;
+import openfl.display.BitmapData;
 #if sys
 import sys.io.File;
 import sys.FileSystem;
-#else
-import openfl.utils.Assets;
 #end
+
+import flixel.FlxG;
+import openfl.utils.Assets;
+import lime.utils.AssetLibrary;
+import lime.utils.AssetManifest;
+import openfl.utils.Assets;
 
 using StringTools;
 
 class CoolUtil
 {
+	public static var difficultyArray:Array<String> = ['Easy', "Normal", "Hard", "Neonight", "Vitor0502", ""];
+	public static var guestArray:Array<String> = ['Snow The Fox', "spres", 'AjTheFunky', "LiterallyNoOne", 'Lylace', 'Tactical Cupcakes', 'Chxwy', 'Mewrk'];
+
 	public static var defaultDifficulties:Array<String> = [
 		'Easy',
 		'Normal',
@@ -41,13 +48,33 @@ class CoolUtil
 		return Paths.formatToSongPath(fileSuffix);
 	}
 
-	public static function difficultyString():String
+	public static function difficultyString2():String
 	{
 		return difficulties[PlayState.storyDifficulty].toUpperCase();
 	}
 
-	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
-		return Math.max(min, Math.min(max, value));
+	public static function difficultyString():String
+	{
+		var guestNumber:Int = 0;
+
+		if (PlayState.storyDifficulty == 5)
+		{
+			switch (PlayState.SONG.song.toLowerCase())
+			{
+				case 'epiphany' | 'bonedoggle': guestNumber = 0;
+				case "rabbit's-luck": guestNumber = 1;
+				case "arch": guestNumber = 2;
+				case 'ghost-vip': guestNumber = 3;
+				case 'you-cant-run': guestNumber = 4;
+				case "its-complicated": guestNumber = 5;
+				case "buildstroll": guestNumber = 6;
+				case 'ballistic': guestNumber = 7;
+			}
+
+			return guestArray[guestNumber];
+		}
+		else
+			return difficultyArray[PlayState.storyDifficulty];
 	}
 
 	public static function coolTextFile(path:String):Array<String>
@@ -66,18 +93,11 @@ class CoolUtil
 
 		return daList;
 	}
-	public static function listFromString(string:String):Array<String>
-	{
-		var daList:Array<String> = [];
-		daList = string.trim().split('\n');
 
-		for (i in 0...daList.length)
-		{
-			daList[i] = daList[i].trim();
-		}
-
-		return daList;
+	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
+		return Math.max(min, Math.min(max, value));
 	}
+
 	public static function dominantColor(sprite:flixel.FlxSprite):Int{
 		var countByColor:Map<Int, Int> = [];
 		for(col in 0...sprite.frameWidth){
@@ -104,6 +124,30 @@ class CoolUtil
 		return maxKey;
 	}
 
+	public static function coolTextFile2(path:String):Array<String>
+	{
+		var daList:Array<String> = File.getContent(path).trim().split('\n');
+
+		for (i in 0...daList.length)
+		{
+			daList[i] = daList[i].trim();
+		}
+
+		return daList;
+	}
+	
+	public static function coolStringFile(path:String):Array<String>
+		{
+			var daList:Array<String> = path.trim().split('\n');
+	
+			for (i in 0...daList.length)
+			{
+				daList[i] = daList[i].trim();
+			}
+	
+			return daList;
+		}
+
 	public static function numberArray(max:Int, ?min = 0):Array<Int>
 	{
 		var dumbArray:Array<Int> = [];
@@ -114,30 +158,9 @@ class CoolUtil
 		return dumbArray;
 	}
 
-	//uhhhh does this even work at all? i'm starting to doubt
-	public static function precacheSound(sound:String, ?library:String = null):Void {
-		precacheSoundFile(Paths.sound(sound, library));
-	}
+	public static function parseJson(json:String):Dynamic {
+		// the reason we do this is to make it easy to swap out json parsers
 
-	public static function precacheMusic(sound:String, ?library:String = null):Void {
-		precacheSoundFile(Paths.music(sound, library));
+		return TJSON.parse(json);
 	}
-
-	private static function precacheSoundFile(file:Dynamic):Void {
-		if (Assets.exists(file, SOUND) || Assets.exists(file, MUSIC))
-			Assets.getSound(file, true);
-	}
-
-	public static function browserLoad(site:String) {
-		#if linux
-		Sys.command('/usr/bin/xdg-open', [site]);
-		#else
-		FlxG.openURL(site);
-		#end
-	}
-
-	public static function camLerpShit(daLerp:Float)
-		{
-		  	return (FlxG.elapsed / 0.016666666666666666) * daLerp;
-		}
 }

@@ -122,7 +122,7 @@ class Alphabet extends FlxSpriteGroup
 			// {
 			// }
 
-			var spaceChar:Bool = (character == " " || (isBold && character == "_"));
+			var spaceChar:Bool = (character == " " || (isBold && character == "-"));
 			if (spaceChar)
 			{
 				consecutiveSpaces++;
@@ -378,7 +378,7 @@ class AlphaCharacter extends FlxSprite
 		setGraphicSize(Std.int(width * textSize));
 		updateHitbox();
 		this.textSize = textSize;
-		antialiasing = ClientPrefs.globalAntialiasing;
+		antialiasing = true;
 	}
 
 	public function createBoldLetter(letter:String)
